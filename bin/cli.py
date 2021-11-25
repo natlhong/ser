@@ -11,6 +11,7 @@ from ser.data import train_dataloader, val_dataloader, test_dataloader
 from ser.infer import infer as run_infer
 from ser.params import Params, save_params, load_params
 from ser.transforms import transforms, normalize, flip
+from ser.test import _select_test_image
 
 main = typer.Typer()
 
@@ -64,11 +65,11 @@ def infer(
     run_path: Path = typer.Option(
         ..., "-p", "--path", help="Path to run from which you want to infer."
     ),
-    label: int = typer.Option(
-        6, "-l", "--label", help="Label of image to show to the model"
-    ),
     flip_image: bool = typer.Option(
         False, "-f", "--flip", help="Flip the image"
+    ),
+    label: int = typer.Option(
+        6, "-l", "--label", help="Label of image to show to the model"
     ),
 ):
     """Run the inference code"""
@@ -78,16 +79,4 @@ def infer(
     run_infer(params, model, image, label)
 
 
-def _select_test_image(label, flip_image):
-    # TODO we should be able to switch between these abstractions without
-    #   having to change any code.
-    #   make it happen!
-    if flip_image:
-        ts = [normalize, flip]
-    else:
-        ts = [normalize]
-    dataloader = test_dataloader(1, transforms(*ts))
-    images, labels = next(iter(dataloader))
-    while labels[0].item() != label:
-        images, labels = next(iter(dataloader))
-    return images
+
